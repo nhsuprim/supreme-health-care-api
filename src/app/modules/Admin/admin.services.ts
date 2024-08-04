@@ -2,7 +2,7 @@ import { Admin, Prisma, UserStatus } from "@prisma/client";
 import { adminSeachField } from "./admin.constant";
 import { paginationHelpers } from "../../helpers/paginationHelpers";
 import prisma from "../../shared/prisma";
-import { cachedDataVersionTag } from "v8";
+
 
 const getAllAdmins = async(params: any, options:any)=>{
     
