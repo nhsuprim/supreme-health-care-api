@@ -174,7 +174,8 @@ const getAllUser = async(params: any, options:any)=>{
 
 }
 
-const updateUserStatus = async(id: string, status: UserRole) =>{
+const updateUserStatus = async(id: string, status: UserStatus) =>{
+    console.log(status);
 
     await prisma.user.findUniqueOrThrow({
         where: {

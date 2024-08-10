@@ -77,7 +77,7 @@ const updateUserStatus = async(req:Request, res:Response, next:NextFunction)=>{
     try {
         //  console.log(req.params);
         const result = await userServices.updateUserStatus(req.params.id, req.body)
-        res.status(200).json({
+        res.status(200).json({ 
             success: true,
             message: "User Status successfully updated",
             data: result
