@@ -1,28 +1,28 @@
-import express, { Application, NextFunction, Request, Response } from 'express';
-import dotenv from "dotenv"
-import cors from 'cors';
-import router from './app/routes';
-import httpStatus from 'http-status';
+import express, { Application, NextFunction, Request, Response } from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import router from "./app/routes";
+import httpStatus from "http-status";
 
-import cookieParser from 'cookie-parser';
-import globalErrorHandler from './app/middleware/globalErrorHandle';
+import cookieParser from "cookie-parser";
+import globalErrorHandler from "./app/middleware/globalErrorHandle";
 
 const app: Application = express();
 app.use(cors());
 app.use(cookieParser());
-dotenv.config()
+dotenv.config();
 
 //parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
     res.send({
-        Message: "Supreme health care server.."
-    })
+        Message: "Supreme health care server..",
+    });
 });
 
-app.use('/api/v1', router);
+app.use("/api/v1", router);
 
 app.use(globalErrorHandler);
 
@@ -32,13 +32,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         message: "API NOT FOUND!",
         error: {
             path: req.originalUrl,
-            message: "Your requested path is not found!"
-        }
-    })
-})
+            message: "Your requested path is not found!",
+        },
+    });
+});
 
 export default app;
-
 
 // import express, { Application, NextFunction, Request, Response } from 'express';
 // import cors from 'cors';
@@ -49,7 +48,6 @@ export default app;
 // import dotenv from "dotenv"
 // import globalErrorHandler from './app/middleware/globalErrorHandle';
 
-
 // const app:Application = express();
 
 // // middleware
@@ -59,10 +57,9 @@ export default app;
 // app.use(globalErrorHandler)
 // app.use(cookieParser());
 
-
 // dotenv.config()
 
-// //routes 
+// //routes
 // // app.use('/api/v1/user', userRoutes)
 // // app.use('/api/v1/admin', AdminRoutes)
 
@@ -94,6 +91,5 @@ export default app;
 //         }
 //     })
 // })
-
 
 // export default app;

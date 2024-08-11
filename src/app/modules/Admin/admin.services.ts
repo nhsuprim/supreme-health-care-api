@@ -3,149 +3,149 @@ import { adminSeachField } from "./admin.constant";
 import { paginationHelpers } from "../../helpers/paginationHelpers";
 import prisma from "../../shared/prisma";
 
+const getAllAdmins = async (params: any, options: any) => {
+    const andConditions: Prisma.AdminWhereInput[] = [];
 
-const getAllAdmins = async(params: any, options:any)=>{
-    
-    const andConditions : Prisma.AdminWhereInput[] = []
+    const { searchTerm, ...filteredData } = params;
+    const { limit, page, skip } =
+        paginationHelpers.calculatePagination(options);
 
-    const {searchTerm, ...filteredData} = params;
-    const {limit, page, skip} = paginationHelpers.calculatePagination(options);
-
-
-    if (params.searchTerm){
+    if (params.searchTerm) {
         andConditions.push({
-            OR: adminSeachField.map(field =>({
+            OR: adminSeachField.map((field) => ({
                 [field]: {
                     contains: params.searchTerm,
                     mode: "insensitive",
-                }
-            }))
-        })
+                },
+            })),
+        });
     }
 
-    if(Object.keys(filteredData).length > 0){
+    if (Object.keys(filteredData).length > 0) {
         andConditions.push({
-            AND: Object.keys(filteredData).map(key => ({
+            AND: Object.keys(filteredData).map((key) => ({
                 [key]: {
                     equals: filteredData[key],
-                }
-            }))
-        })
+                },
+            })),
+        });
     }
     andConditions.push({
-        isDeleted: false
-    })
+        isDeleted: false,
+    });
 
-    const conditions: Prisma.AdminWhereInput ={AND: andConditions} 
+    const conditions: Prisma.AdminWhereInput = { AND: andConditions };
 
     const results = await prisma.admin.findMany({
         where: conditions,
         skip,
         take: limit,
-        orderBy: options.sortBy && options.sortOrder ? {
-            [options.sortBy]: options.sortOrder
-        }: {
-            createdAt: 'desc'
-        }
-    })
+        orderBy:
+            options.sortBy && options.sortOrder
+                ? {
+                      [options.sortBy]: options.sortOrder,
+                  }
+                : {
+                      createdAt: "desc",
+                  },
+    });
 
-    
-
-    const total = await prisma.admin.count({where: conditions})
+    const total = await prisma.admin.count({ where: conditions });
     return {
-        meta:{
+        meta: {
             page,
             limit,
-            total
+            total,
         },
         data: results,
-    }
+    };
+};
 
-}
-
-const getById = async(id: string) : Promise<Admin | null> =>{
-    const result =  await prisma.admin.findUniqueOrThrow({
+const getById = async (id: string): Promise<Admin | null> => {
+    const result = await prisma.admin.findUniqueOrThrow({
         where: {
-            id:id,
-            isDeleted: false
-        }
-    })
-    return result
-}
+            id: id,
+            isDeleted: false,
+        },
+    });
+    return result;
+};
 
-const update = async(id: string, data: Partial<Admin>): Promise<Admin | null> =>{
-
+const update = async (
+    id: string,
+    data: Partial<Admin>
+): Promise<Admin | null> => {
     await prisma.admin.findUniqueOrThrow({
         where: {
-            id
-        }
-    })
+            id,
+        },
+    });
     const result = await prisma.admin.update({
         where: {
             id,
-            isDeleted: false
+            isDeleted: false,
         },
-        data
-    })
-    return result
-}
+        data,
+    });
+    return result;
+};
 
-const deleteAdmin = async(id: string): Promise<Admin | null> =>{
-    await prisma.admin.findUniqueOrThrow({
-        where: {
-            id
-        }
-    })
-
-    const result  = await prisma.$transaction(async(transactionClient )=>{
-        const adminDeletedData = await transactionClient.admin.delete({
-            where: {
-                id
-            }
-        })
-        const userDeletedData = await transactionClient.user.delete({
-            where: {
-                email: adminDeletedData.email
-            }
-        })
-        return adminDeletedData
-    })
-    return result
-}
-
-const softDeleteAdmin = async(id: string): Promise<Admin | null> =>{
+const deleteAdmin = async (id: string): Promise<Admin | null> => {
     await prisma.admin.findUniqueOrThrow({
         where: {
             id,
-            isDeleted: false
-        }
-    })
-    
-    const result  = await prisma.$transaction(async(transactionClient )=>{
+        },
+    });
+
+    const result = await prisma.$transaction(async (transactionClient) => {
+        const adminDeletedData = await transactionClient.admin.delete({
+            where: {
+                id,
+            },
+        });
+        const userDeletedData = await transactionClient.user.delete({
+            where: {
+                email: adminDeletedData.email,
+            },
+        });
+        return adminDeletedData;
+    });
+    return result;
+};
+
+const softDeleteAdmin = async (id: string): Promise<Admin | null> => {
+    await prisma.admin.findUniqueOrThrow({
+        where: {
+            id,
+            isDeleted: false,
+        },
+    });
+
+    const result = await prisma.$transaction(async (transactionClient) => {
         const adminDeletedData = await transactionClient.admin.update({
             where: {
-                id
+                id,
             },
             data: {
-                isDeleted: true
-            }
-        })
+                isDeleted: true,
+            },
+        });
         const userDeletedData = await transactionClient.user.update({
             where: {
-                email: adminDeletedData.email
+                email: adminDeletedData.email,
             },
-            data:{
+            data: {
                 status: UserStatus.DELETED,
-            }
-        })
-        return adminDeletedData
-    })
-    return result
-}
+            },
+        });
+        return adminDeletedData;
+    });
+    return result;
+};
 export const AdminService = {
     getAllAdmins,
     getById,
     update,
     deleteAdmin,
-    softDeleteAdmin
-}
+    softDeleteAdmin,
+};
