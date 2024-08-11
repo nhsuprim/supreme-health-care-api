@@ -7,6 +7,7 @@ import emailSender from "./sendEmail"
 
 const AccessTokenJwtSecret = process.env.ACCESS_JWT_SECRET as Secret
 const RefreshTokenJwtSecret = process.env.REFRESH_JWT_SECRET as Secret
+// const AccessTokenJwtSecretExpireIn = process.env.ACCESS_JWT_SECRET_EXPIRES_IN
 
 
 const logInUser = async(payload:{
@@ -30,7 +31,7 @@ const logInUser = async(payload:{
         email: userData.email,
         role: userData.role,
         secretKey: AccessTokenJwtSecret,
-        expiresIn: '5m'  
+        expiresIn: '30d'
     })
 
     const refreshToken = generateToken({
