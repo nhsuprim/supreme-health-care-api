@@ -13,12 +13,6 @@ router.get(
     userControllers.getAllFromDb
 );
 
-router.patch(
-    "/status/:id",
-    auth(UserRole.ADMIN, UserRole.SUPERADMIN),
-    userControllers.updateUserStatus
-);
-
 router.get(
     "/me",
     auth(
@@ -28,6 +22,12 @@ router.get(
         UserRole.SUPERADMIN
     ),
     userControllers.getMyProfile
+);
+
+router.patch(
+    "/status/:id",
+    auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+    userControllers.updateUserStatus
 );
 
 router.post(
