@@ -30,6 +30,13 @@ const calculatePagination = (options:IOptions): IOptionsRO =>{
     }
 }
 
+export type IPaginationOptions = {
+    page?: number;
+    limit?: number;
+    sortBy?: string | undefined;
+    sortOrder?: string | undefined;
+}
+
 export const paginationHelpers = {
     calculatePagination
 }
