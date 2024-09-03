@@ -62,7 +62,7 @@ const getAllDoctor = async (params: any, options: any) => {
                       [options.sortBy]: options.sortOrder,
                   }
                 : {
-                      createdAt: "desc",
+                      averageRating: "desc",
                   },
 
         include: {

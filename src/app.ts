@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import router from "./app/routes";
 import httpStatus from "http-status";
-
+import cron from "node-cron";
 import cookieParser from "cookie-parser";
 import globalErrorHandler from "./app/middleware/globalErrorHandle";
+import { AppointmentService } from "./app/modules/Appointment/appointment.services";
 
 const app: Application = express();
 app.use(cors());
@@ -25,6 +26,14 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/api/v1", router);
 
 app.use(globalErrorHandler);
+
+cron.schedule("* * * * *", () => {
+    try {
+        AppointmentService.cancelUnpaidAppointments();
+    } catch (err) {
+        console.error(err);
+    }
+});
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.status(httpStatus.NOT_FOUND).json({

@@ -80,6 +80,22 @@ const getAllfromDB = async (params: any, options: any) => {
     };
 };
 
+const updateInDb = async (id: string, data: any, file?: IFile) => {
+    if (file) {
+        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+        data.icon = uploadToCloudinary?.secure_url;
+    }
+
+    const result = await prisma.specialities.update({
+        where: {
+            id,
+        },
+        data,
+    });
+
+    return result;
+};
+
 const deletefromDB = async (id: any) => {
     const result = await prisma.specialities.delete({
         where: {
@@ -92,5 +108,6 @@ const deletefromDB = async (id: any) => {
 export const SpecialitiesService = {
     insertToDb,
     getAllfromDB,
+    updateInDb,
     deletefromDB,
 };

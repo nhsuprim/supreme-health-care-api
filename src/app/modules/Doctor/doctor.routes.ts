@@ -1,5 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import { DoctorController } from "./doctor.controllers";
+import { DoctorValidation } from "./doctor.validation";
+import validateRequest from "../../middleware/validateRequest";
 
 const router = express.Router();
 
@@ -7,7 +9,11 @@ router.get("/", DoctorController.getAllDoctor);
 
 router.get("/:id", DoctorController.getById);
 
-router.patch("/:id", DoctorController.updateDoctor);
+router.patch(
+    "/:id",
+    validateRequest(DoctorValidation.update),
+    DoctorController.updateDoctor
+);
 
 router.delete("/:id", DoctorController.deleteDoctor);
 

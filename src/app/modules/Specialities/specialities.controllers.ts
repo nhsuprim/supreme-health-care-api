@@ -43,6 +43,27 @@ const getAllFromDb = catchAsync(
     }
 );
 
+const updateInDb = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id;
+            const data = req.body;
+
+            const file = req.file ? req.file : undefined;
+
+            const result = await SpecialitiesService.updateInDb(id, data, file);
+
+            res.status(httpStatus.OK).json({
+                success: true,
+                message: "Speciality updated successfully",
+                data: result,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
 const deletefromDB = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -65,4 +86,5 @@ export const SpecialitiesController = {
     insertToDb,
     getAllFromDb,
     deletefromDB,
+    updateInDb,
 };

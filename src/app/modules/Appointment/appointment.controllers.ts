@@ -4,6 +4,7 @@ import { IAuthUser } from "../../interface/user";
 import { AppointmentService } from "./appointment.services";
 import httpStatus from "http-status";
 import pick from "../../shared/pick";
+import { appointmentFilterableFields } from "./appointment.constant";
 
 const createAppointment = catchAsync(
     async (
@@ -29,13 +30,6 @@ const createAppointment = catchAsync(
         }
     }
 );
-
-export const appointmentFilterableFields: string[] = [
-    "status",
-    "paymentStatus",
-    "patientEmail",
-    "doctorEmail",
-];
 
 const getMyAppointment = catchAsync(
     async (
@@ -70,7 +64,39 @@ const getMyAppointment = catchAsync(
     }
 );
 
+const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
+    const filters = pick(req.query, appointmentFilterableFields);
+    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+    const result = await AppointmentService.getAllFromDB(filters, options);
+    res.status(httpStatus.OK).json({
+        success: true,
+        message: "All Appointments retrieved successfully",
+        data: result,
+    });
+});
+
+const changeAppointmentStatus = catchAsync(
+    async (req: Request & { user?: IAuthUser }, res: Response) => {
+        const { id } = req.params;
+        const { status } = req.body;
+        const user = req.user;
+
+        const result = await AppointmentService.changeAppointmentStatus(
+            id,
+            status,
+            user as IAuthUser
+        );
+        res.status(httpStatus.OK).json({
+            success: true,
+            message: "Appointment status changed successfully",
+            data: result,
+        });
+    }
+);
+
 export const AppointmentController = {
     createAppointment,
     getMyAppointment,
+    getAllFromDB,
+    changeAppointmentStatus,
 };
