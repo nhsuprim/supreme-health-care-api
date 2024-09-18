@@ -54,11 +54,7 @@ const createPatient = async (
             data: result,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to create Patient",
-            error: error,
-        });
+        next(error);
     }
 };
 
