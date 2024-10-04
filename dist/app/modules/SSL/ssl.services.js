@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -16,7 +7,7 @@ exports.SSLService = void 0;
 const axios_1 = __importDefault(require("axios"));
 const http_status_1 = __importDefault(require("http-status"));
 const ApiError_1 = __importDefault(require("../../erros/ApiError"));
-const initPayment = (paymentData) => __awaiter(void 0, void 0, void 0, function* () {
+const initPayment = async (paymentData) => {
     try {
         const data = {
             store_id: process.env.STORE_ID,
@@ -50,7 +41,7 @@ const initPayment = (paymentData) => __awaiter(void 0, void 0, void 0, function*
             ship_postcode: 1000,
             ship_country: "N/A",
         };
-        const response = yield (0, axios_1.default)({
+        const response = await (0, axios_1.default)({
             method: "post",
             url: process.env.SSL_PAYMENT_API,
             data: data,
@@ -61,10 +52,10 @@ const initPayment = (paymentData) => __awaiter(void 0, void 0, void 0, function*
     catch (err) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Payment erro occured!");
     }
-});
-const validatePayment = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const validatePayment = async (payload) => {
     try {
-        const response = yield (0, axios_1.default)({
+        const response = await (0, axios_1.default)({
             method: "GET",
             url: `${process.env.SSL_VALIDATION_API}?val_id=${payload.val_id}&store_id=${process.env.STORE_ID}&store_passwd=${process.env.STORE_PASS}&format=json`,
         });
@@ -73,7 +64,7 @@ const validatePayment = (payload) => __awaiter(void 0, void 0, void 0, function*
     catch (err) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Payment validation failed!");
     }
-});
+};
 exports.SSLService = {
     initPayment,
     validatePayment,

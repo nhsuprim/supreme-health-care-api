@@ -28,9 +28,6 @@ const insertIntoDB = async (
         },
     });
 
-    console.log(user?.email);
-    console.log(appointmentData.doctor.email);
-
     if (!(user?.email === appointmentData.doctor.email)) {
         throw new ApiError(
             httpStatus.BAD_REQUEST,

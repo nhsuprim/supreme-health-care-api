@@ -1,24 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -28,9 +8,9 @@ const client_1 = require("@prisma/client");
 const admin_constant_1 = require("./admin.constant");
 const paginationHelpers_1 = require("../../helpers/paginationHelpers");
 const prisma_1 = __importDefault(require("../../shared/prisma"));
-const getAllAdmins = (params, options) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllAdmins = async (params, options) => {
     const andConditions = [];
-    const { searchTerm } = params, filteredData = __rest(params, ["searchTerm"]);
+    const { searchTerm, ...filteredData } = params;
     const { limit, page, skip } = paginationHelpers_1.paginationHelpers.calculatePagination(options);
     if (params.searchTerm) {
         andConditions.push({
@@ -55,7 +35,7 @@ const getAllAdmins = (params, options) => __awaiter(void 0, void 0, void 0, func
         isDeleted: false,
     });
     const conditions = { AND: andConditions };
-    const results = yield prisma_1.default.admin.findMany({
+    const results = await prisma_1.default.admin.findMany({
         where: conditions,
         skip,
         take: limit,
@@ -67,7 +47,7 @@ const getAllAdmins = (params, options) => __awaiter(void 0, void 0, void 0, func
                 createdAt: "desc",
             },
     });
-    const total = yield prisma_1.default.admin.count({ where: conditions });
+    const total = await prisma_1.default.admin.count({ where: conditions });
     return {
         meta: {
             page,
@@ -76,23 +56,23 @@ const getAllAdmins = (params, options) => __awaiter(void 0, void 0, void 0, func
         },
         data: results,
     };
-});
-const getById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.admin.findUniqueOrThrow({
+};
+const getById = async (id) => {
+    const result = await prisma_1.default.admin.findUniqueOrThrow({
         where: {
             id: id,
             isDeleted: false,
         },
     });
     return result;
-});
-const update = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    yield prisma_1.default.admin.findUniqueOrThrow({
+};
+const update = async (id, data) => {
+    await prisma_1.default.admin.findUniqueOrThrow({
         where: {
             id,
         },
     });
-    const result = yield prisma_1.default.admin.update({
+    const result = await prisma_1.default.admin.update({
         where: {
             id,
             isDeleted: false,
@@ -100,37 +80,37 @@ const update = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
         data,
     });
     return result;
-});
-const deleteAdmin = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    yield prisma_1.default.admin.findUniqueOrThrow({
+};
+const deleteAdmin = async (id) => {
+    await prisma_1.default.admin.findUniqueOrThrow({
         where: {
             id,
         },
     });
-    const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
-        const adminDeletedData = yield transactionClient.admin.delete({
+    const result = await prisma_1.default.$transaction(async (transactionClient) => {
+        const adminDeletedData = await transactionClient.admin.delete({
             where: {
                 id,
             },
         });
-        const userDeletedData = yield transactionClient.user.delete({
+        const userDeletedData = await transactionClient.user.delete({
             where: {
                 email: adminDeletedData.email,
             },
         });
         return adminDeletedData;
-    }));
+    });
     return result;
-});
-const softDeleteAdmin = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    yield prisma_1.default.admin.findUniqueOrThrow({
+};
+const softDeleteAdmin = async (id) => {
+    await prisma_1.default.admin.findUniqueOrThrow({
         where: {
             id,
             isDeleted: false,
         },
     });
-    const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
-        const adminDeletedData = yield transactionClient.admin.update({
+    const result = await prisma_1.default.$transaction(async (transactionClient) => {
+        const adminDeletedData = await transactionClient.admin.update({
             where: {
                 id,
             },
@@ -138,7 +118,7 @@ const softDeleteAdmin = (id) => __awaiter(void 0, void 0, void 0, function* () {
                 isDeleted: true,
             },
         });
-        const userDeletedData = yield transactionClient.user.update({
+        const userDeletedData = await transactionClient.user.update({
             where: {
                 email: adminDeletedData.email,
             },
@@ -147,9 +127,9 @@ const softDeleteAdmin = (id) => __awaiter(void 0, void 0, void 0, function* () {
             },
         });
         return adminDeletedData;
-    }));
+    });
     return result;
-});
+};
 exports.AdminService = {
     getAllAdmins,
     getById,

@@ -1,24 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -30,18 +10,18 @@ const prisma_1 = __importDefault(require("../../shared/prisma"));
 const uuid_1 = require("uuid");
 const ApiError_1 = __importDefault(require("../../erros/ApiError"));
 const http_status_1 = __importDefault(require("http-status"));
-const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const patientData = yield prisma_1.default.patient.findUniqueOrThrow({
+const createAppointment = async (user, payload) => {
+    const patientData = await prisma_1.default.patient.findUniqueOrThrow({
         where: {
-            email: user === null || user === void 0 ? void 0 : user.email,
+            email: user?.email,
         },
     });
-    const doctorData = yield prisma_1.default.doctor.findUniqueOrThrow({
+    const doctorData = await prisma_1.default.doctor.findUniqueOrThrow({
         where: {
             id: payload.doctorId,
         },
     });
-    const scheduleData = yield prisma_1.default.doctorSchedules.findFirstOrThrow({
+    const scheduleData = await prisma_1.default.doctorSchedules.findFirstOrThrow({
         where: {
             doctorId: doctorData.id,
             scheduleId: payload.scheduleId,
@@ -49,8 +29,8 @@ const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, f
         },
     });
     const videoCallingId = (0, uuid_1.v4)();
-    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
-        const appointmentData = yield tx.appointment.create({
+    const result = await prisma_1.default.$transaction(async (tx) => {
+        const appointmentData = await tx.appointment.create({
             data: {
                 patientId: patientData.id,
                 doctorId: doctorData.id,
@@ -63,7 +43,7 @@ const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, f
                 schedule: true,
             },
         });
-        yield tx.doctorSchedules.update({
+        await tx.doctorSchedules.update({
             where: {
                 doctorId_scheduleId: {
                     doctorId: doctorData.id,
@@ -87,7 +67,7 @@ const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, f
             today.getHours() +
             "-" +
             today.getMinutes();
-        yield tx.payment.create({
+        await tx.payment.create({
             data: {
                 appointmentId: appointmentData.id,
                 amount: doctorData.apointmentFee,
@@ -95,24 +75,24 @@ const createAppointment = (user, payload) => __awaiter(void 0, void 0, void 0, f
             },
         });
         return appointmentData;
-    }));
+    });
     return result;
-});
-const getMyAppointment = (user, filters, options) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getMyAppointment = async (user, filters, options) => {
     const { limit, page, skip } = paginationHelpers_1.paginationHelpers.calculatePagination(options);
-    const filterData = __rest(filters, []);
+    const { ...filterData } = filters;
     const andConditions = [];
-    if ((user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.PATIENT) {
+    if (user?.role === client_1.UserRole.PATIENT) {
         andConditions.push({
             patient: {
-                email: user === null || user === void 0 ? void 0 : user.email,
+                email: user?.email,
             },
         });
     }
-    if ((user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.DOCTOR) {
+    if (user?.role === client_1.UserRole.DOCTOR) {
         andConditions.push({
             doctor: {
-                email: user === null || user === void 0 ? void 0 : user.email,
+                email: user?.email,
             },
         });
     }
@@ -125,14 +105,14 @@ const getMyAppointment = (user, filters, options) => __awaiter(void 0, void 0, v
         andConditions.push(...filterConditions);
     }
     const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
-    const result = yield prisma_1.default.appointment.findMany({
+    const result = await prisma_1.default.appointment.findMany({
         where: whereConditions,
         skip,
         take: limit,
         orderBy: options.sortBy && options.sortOrder
             ? { [options.sortBy]: options.sortOrder }
             : { createdAt: "desc" },
-        include: (user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.PATIENT
+        include: user?.role === client_1.UserRole.PATIENT
             ? { doctor: true, schedule: true }
             : {
                 patient: {
@@ -144,7 +124,7 @@ const getMyAppointment = (user, filters, options) => __awaiter(void 0, void 0, v
                 schedule: true,
             },
     });
-    const total = yield prisma_1.default.appointment.count({
+    const total = await prisma_1.default.appointment.count({
         where: whereConditions,
     });
     return {
@@ -155,10 +135,10 @@ const getMyAppointment = (user, filters, options) => __awaiter(void 0, void 0, v
         },
         data: result,
     };
-});
-const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getAllFromDB = async (filters, options) => {
     const { limit, page, skip } = paginationHelpers_1.paginationHelpers.calculatePagination(options);
-    const { patientEmail, doctorEmail } = filters, filterData = __rest(filters, ["patientEmail", "doctorEmail"]);
+    const { patientEmail, doctorEmail, ...filterData } = filters;
     const andConditions = [];
     if (patientEmail) {
         andConditions.push({
@@ -187,7 +167,7 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
     }
     // console.dir(andConditions, { depth: Infinity })
     const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
-    const result = yield prisma_1.default.appointment.findMany({
+    const result = await prisma_1.default.appointment.findMany({
         where: whereConditions,
         skip,
         take: limit,
@@ -201,7 +181,7 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
             patient: true,
         },
     });
-    const total = yield prisma_1.default.appointment.count({
+    const total = await prisma_1.default.appointment.count({
         where: whereConditions,
     });
     return {
@@ -212,9 +192,9 @@ const getAllFromDB = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         },
         data: result,
     };
-});
-const changeAppointmentStatus = (appointmentId, status, user) => __awaiter(void 0, void 0, void 0, function* () {
-    const appointmentData = yield prisma_1.default.appointment.findUniqueOrThrow({
+};
+const changeAppointmentStatus = async (appointmentId, status, user) => {
+    const appointmentData = await prisma_1.default.appointment.findUniqueOrThrow({
         where: {
             id: appointmentId,
         },
@@ -222,12 +202,12 @@ const changeAppointmentStatus = (appointmentId, status, user) => __awaiter(void 
             doctor: true,
         },
     });
-    if ((user === null || user === void 0 ? void 0 : user.role) === client_1.UserRole.DOCTOR) {
+    if (user?.role === client_1.UserRole.DOCTOR) {
         if (!(user.email === appointmentData.doctor.email)) {
             throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "This is not your appointment!");
         }
     }
-    const result = yield prisma_1.default.appointment.update({
+    const result = await prisma_1.default.appointment.update({
         where: {
             id: appointmentId,
         },
@@ -236,10 +216,10 @@ const changeAppointmentStatus = (appointmentId, status, user) => __awaiter(void 
         },
     });
     return result;
-});
-const cancelUnpaidAppointments = () => __awaiter(void 0, void 0, void 0, function* () {
+};
+const cancelUnpaidAppointments = async () => {
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
-    const unPaidAppointments = yield prisma_1.default.appointment.findMany({
+    const unPaidAppointments = await prisma_1.default.appointment.findMany({
         where: {
             createdAt: {
                 lte: thirtyMinAgo,
@@ -248,15 +228,15 @@ const cancelUnpaidAppointments = () => __awaiter(void 0, void 0, void 0, functio
         },
     });
     const appointmentIdsToCancel = unPaidAppointments.map((appointment) => appointment.id);
-    yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
-        yield tx.payment.deleteMany({
+    await prisma_1.default.$transaction(async (tx) => {
+        await tx.payment.deleteMany({
             where: {
                 appointmentId: {
                     in: appointmentIdsToCancel,
                 },
             },
         });
-        yield tx.appointment.deleteMany({
+        await tx.appointment.deleteMany({
             where: {
                 id: {
                     in: appointmentIdsToCancel,
@@ -264,7 +244,7 @@ const cancelUnpaidAppointments = () => __awaiter(void 0, void 0, void 0, functio
             },
         });
         for (const upPaidAppointment of unPaidAppointments) {
-            yield tx.doctorSchedules.updateMany({
+            await tx.doctorSchedules.updateMany({
                 where: {
                     doctorId: upPaidAppointment.doctorId,
                     scheduleId: upPaidAppointment.scheduleId,
@@ -274,9 +254,9 @@ const cancelUnpaidAppointments = () => __awaiter(void 0, void 0, void 0, functio
                 },
             });
         }
-    }));
+    });
     //console.log("updated")
-});
+};
 exports.AppointmentService = {
     createAppointment,
     getMyAppointment,

@@ -22,26 +22,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -53,78 +33,78 @@ const prisma_1 = __importDefault(require("../../shared/prisma"));
 const fileUploaders_1 = require("../../helpers/fileUploaders");
 const paginationHelpers_1 = require("../../helpers/paginationHelpers");
 const user_constant_1 = require("./user.constant");
-const createAdmin = (req) => __awaiter(void 0, void 0, void 0, function* () {
+const createAdmin = async (req) => {
     const file = req.file;
     if (file) {
-        const uploadToCloudinary = yield fileUploaders_1.fileUploader.uploadToCloudinary(file);
-        req.body.admin.profilePhoto = uploadToCloudinary === null || uploadToCloudinary === void 0 ? void 0 : uploadToCloudinary.secure_url;
+        const uploadToCloudinary = await fileUploaders_1.fileUploader.uploadToCloudinary(file);
+        req.body.admin.profilePhoto = uploadToCloudinary?.secure_url;
     }
-    const hashedPassword = yield bcrypt.hash(req.body.password, 12);
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
     const UserData = {
         email: req.body.admin.email,
         password: hashedPassword,
         role: client_1.UserRole.ADMIN,
     };
-    const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
-        yield transactionClient.user.create({
+    const result = await prisma_1.default.$transaction(async (transactionClient) => {
+        await transactionClient.user.create({
             data: UserData,
         });
-        const createdAdminData = yield transactionClient.admin.create({
+        const createdAdminData = await transactionClient.admin.create({
             data: req.body.admin,
         });
         return createdAdminData;
-    }));
+    });
     return result;
-});
-const createDoctor = (req) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const createDoctor = async (req) => {
     const file = req.file;
     if (file) {
-        const uploadToCloudinary = yield fileUploaders_1.fileUploader.uploadToCloudinary(file);
-        req.body.doctor.profilePhoto = uploadToCloudinary === null || uploadToCloudinary === void 0 ? void 0 : uploadToCloudinary.secure_url;
+        const uploadToCloudinary = await fileUploaders_1.fileUploader.uploadToCloudinary(file);
+        req.body.doctor.profilePhoto = uploadToCloudinary?.secure_url;
     }
-    const hashedPassword = yield bcrypt.hash(req.body.password, 12);
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
     const UserData = {
         email: req.body.doctor.email,
         password: hashedPassword,
         role: client_1.UserRole.DOCTOR,
     };
-    const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
-        yield transactionClient.user.create({
+    const result = await prisma_1.default.$transaction(async (transactionClient) => {
+        await transactionClient.user.create({
             data: UserData,
         });
-        const createdDoctorData = yield transactionClient.doctor.create({
+        const createdDoctorData = await transactionClient.doctor.create({
             data: req.body.doctor,
         });
         return createdDoctorData;
-    }));
+    });
     return result;
-});
-const createPatient = (req) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const createPatient = async (req) => {
     const file = req.file;
     if (file) {
-        const uploadToCloudinary = yield fileUploaders_1.fileUploader.uploadToCloudinary(file);
-        req.body.patient.profilePhoto = uploadToCloudinary === null || uploadToCloudinary === void 0 ? void 0 : uploadToCloudinary.secure_url;
+        const uploadToCloudinary = await fileUploaders_1.fileUploader.uploadToCloudinary(file);
+        req.body.patient.profilePhoto = uploadToCloudinary?.secure_url;
     }
-    const hashedPassword = yield bcrypt.hash(req.body.password, 12);
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
     const UserData = {
         email: req.body.patient.email,
         password: hashedPassword,
         role: client_1.UserRole.PATIENT,
     };
-    const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
-        yield transactionClient.user.create({
+    const result = await prisma_1.default.$transaction(async (transactionClient) => {
+        await transactionClient.user.create({
             data: UserData,
         });
-        const createdPatientData = yield transactionClient.patient.create({
+        const createdPatientData = await transactionClient.patient.create({
             data: req.body.patient,
         });
         return createdPatientData;
-    }));
+    });
     return result;
-});
-const getAllUser = (params, options) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getAllUser = async (params, options) => {
     const andConditions = [];
-    const { searchTerm } = params, filteredData = __rest(params, ["searchTerm"]);
+    const { searchTerm, ...filteredData } = params;
     const { limit, page, skip } = paginationHelpers_1.paginationHelpers.calculatePagination(options);
     if (params.searchTerm) {
         andConditions.push({
@@ -149,7 +129,7 @@ const getAllUser = (params, options) => __awaiter(void 0, void 0, void 0, functi
     //     isDeleted: false
     // })
     const conditions = andConditions.length > 0 ? { AND: andConditions } : {};
-    const results = yield prisma_1.default.user.findMany({
+    const results = await prisma_1.default.user.findMany({
         where: conditions,
         skip,
         take: limit,
@@ -173,7 +153,7 @@ const getAllUser = (params, options) => __awaiter(void 0, void 0, void 0, functi
             patient: true,
         },
     });
-    const total = yield prisma_1.default.user.count({ where: conditions });
+    const total = await prisma_1.default.user.count({ where: conditions });
     return {
         meta: {
             page,
@@ -182,26 +162,26 @@ const getAllUser = (params, options) => __awaiter(void 0, void 0, void 0, functi
         },
         data: results,
     };
-});
-const updateUserStatus = (id, status) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const updateUserStatus = async (id, status) => {
     console.log(status);
-    yield prisma_1.default.user.findUniqueOrThrow({
+    await prisma_1.default.user.findUniqueOrThrow({
         where: {
             id,
         },
     });
-    const result = yield prisma_1.default.user.update({
+    const result = await prisma_1.default.user.update({
         where: {
             id,
         },
         data: status,
     });
     return result;
-});
-const getMyProfile = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    const userInfo = yield prisma_1.default.user.findFirstOrThrow({
+};
+const getMyProfile = async (user) => {
+    const userInfo = await prisma_1.default.user.findFirstOrThrow({
         where: {
-            email: user === null || user === void 0 ? void 0 : user.email,
+            email: user?.email,
             status: client_1.UserStatus.ACTIVE,
         },
         select: {
@@ -214,50 +194,50 @@ const getMyProfile = (user) => __awaiter(void 0, void 0, void 0, function* () {
     });
     let userProfile;
     if (userInfo.role === "ADMIN") {
-        userProfile = yield prisma_1.default.admin.findFirstOrThrow({
+        userProfile = await prisma_1.default.admin.findFirstOrThrow({
             where: {
                 email: userInfo.email,
             },
         });
     }
     if (userInfo.role === "DOCTOR") {
-        userProfile = yield prisma_1.default.admin.findFirstOrThrow({
+        userProfile = await prisma_1.default.admin.findFirstOrThrow({
             where: {
                 email: userInfo.email,
             },
         });
     }
     if (userInfo.role === "PATIENT") {
-        userProfile = yield prisma_1.default.admin.findFirstOrThrow({
+        userProfile = await prisma_1.default.admin.findFirstOrThrow({
             where: {
                 email: userInfo.email,
             },
         });
     }
     if (userInfo.role === "SUPERADMIN") {
-        userProfile = yield prisma_1.default.admin.findFirstOrThrow({
+        userProfile = await prisma_1.default.admin.findFirstOrThrow({
             where: {
                 email: userInfo.email,
             },
         });
     }
-    return Object.assign(Object.assign({}, userInfo), userProfile);
-});
-const updateProfile = (user, req) => __awaiter(void 0, void 0, void 0, function* () {
-    const userInfo = yield prisma_1.default.user.findFirstOrThrow({
+    return { ...userInfo, ...userProfile };
+};
+const updateProfile = async (user, req) => {
+    const userInfo = await prisma_1.default.user.findFirstOrThrow({
         where: {
-            email: user === null || user === void 0 ? void 0 : user.email,
+            email: user?.email,
             status: client_1.UserStatus.ACTIVE,
         },
     });
     const file = req.file;
     if (file) {
-        const uploadToCloudinary = yield fileUploaders_1.fileUploader.uploadToCloudinary(file);
-        req.body.profilePhoto = uploadToCloudinary === null || uploadToCloudinary === void 0 ? void 0 : uploadToCloudinary.secure_url;
+        const uploadToCloudinary = await fileUploaders_1.fileUploader.uploadToCloudinary(file);
+        req.body.profilePhoto = uploadToCloudinary?.secure_url;
     }
     let userProfile;
     if (userInfo.role === "ADMIN") {
-        userProfile = yield prisma_1.default.admin.update({
+        userProfile = await prisma_1.default.admin.update({
             where: {
                 email: userInfo.email,
             },
@@ -265,7 +245,7 @@ const updateProfile = (user, req) => __awaiter(void 0, void 0, void 0, function*
         });
     }
     if (userInfo.role === "DOCTOR") {
-        userProfile = yield prisma_1.default.admin.update({
+        userProfile = await prisma_1.default.admin.update({
             where: {
                 email: userInfo.email,
             },
@@ -273,7 +253,7 @@ const updateProfile = (user, req) => __awaiter(void 0, void 0, void 0, function*
         });
     }
     if (userInfo.role === "PATIENT") {
-        userProfile = yield prisma_1.default.admin.update({
+        userProfile = await prisma_1.default.admin.update({
             where: {
                 email: userInfo.email,
             },
@@ -281,15 +261,15 @@ const updateProfile = (user, req) => __awaiter(void 0, void 0, void 0, function*
         });
     }
     if (userInfo.role === "SUPERADMIN") {
-        userProfile = yield prisma_1.default.admin.update({
+        userProfile = await prisma_1.default.admin.update({
             where: {
                 email: userInfo.email,
             },
             data: req.body,
         });
     }
-    return Object.assign({}, userProfile);
-});
+    return { ...userProfile };
+};
 exports.userServices = {
     createAdmin,
     createDoctor,

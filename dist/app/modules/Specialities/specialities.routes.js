@@ -12,7 +12,7 @@ const authMiddleware_1 = __importDefault(require("../../middleware/authMiddlewar
 const client_1 = require("@prisma/client");
 const router = express_1.default.Router();
 router.get("/", specialities_controllers_1.SpecialitiesController.getAllFromDb);
-router.post("/", fileUploaders_1.fileUploader.upload.single("file"), (req, res, next) => {
+router.post("/", (0, authMiddleware_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.SUPERADMIN), fileUploaders_1.fileUploader.upload.single("file"), (req, res, next) => {
     req.body = specialities_validation_1.SpecilitiesValidation.create.parse(JSON.parse(req.body.data));
     return specialities_controllers_1.SpecialitiesController.insertToDb(req, res, next);
 });
